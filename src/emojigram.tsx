@@ -1,4 +1,5 @@
 import { CameraIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import { useRef, useState } from "react";
 import type { ChangeEventHandler, FunctionComponent } from "react";
 
@@ -134,28 +135,48 @@ export const Emojigram: FunctionComponent = () => {
         />
       </div>
 
-      <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-zinc-950/10 bg-zinc-50 p-4 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
-        {emojigram ? (
-          <svg width={512} height={512} viewBox="0 0 512 512">
-            {emojigram.map((emoji, index) => (
-              <text
-                key={index}
-                x={emoji.x}
-                y={emoji.y}
-                dominantBaseline="central"
-                textAnchor="middle"
-                transform={`rotate(${emoji.rotate}deg)`}
-                fontSize={emoji.fontSize}
-              >
-                {emoji.text}
-              </text>
-            ))}
-          </svg>
-        ) : (
-          <p className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
-            写真を選択すると、Emojigramの生成結果がここに表示されます
-          </p>
+      <div
+        className={clsx(
+          "flex min-h-[200px] items-center justify-center rounded-lg p-[2px]",
+          generating
+            ? "border border-transparent [background-size:300%]"
+            : "border border-zinc-950/10 bg-zinc-50",
         )}
+        style={
+          generating
+            ? {
+                backgroundImage:
+                  "linear-gradient(45deg, #fde68a, #86efac, #7dd3fc, #93c5fd, #c4b5fd, #f9a8d4, #fde68a)",
+                animation: "gradient-spin 3s linear infinite",
+              }
+            : {}
+        }
+      >
+        <div className="flex min-h-[196px] w-full items-center justify-center rounded-md bg-zinc-50 p-4">
+          {emojigram ? (
+            <svg width={512} height={512} viewBox="0 0 512 512">
+              {emojigram.map((emoji, index) => (
+                <text
+                  key={index}
+                  x={emoji.x}
+                  y={emoji.y}
+                  dominantBaseline="central"
+                  textAnchor="middle"
+                  transform={`rotate(${emoji.rotate})`}
+                  fontSize={emoji.fontSize}
+                >
+                  {emoji.text}
+                </text>
+              ))}
+            </svg>
+          ) : (
+            <p className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
+              {generating
+                ? "Emojigramを生成しています……"
+                : "写真を選択すると、Emojigramの生成結果がここに表示されます"}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
