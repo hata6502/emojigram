@@ -1,0 +1,43 @@
+{
+  "name": "emojigram",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hata6502/emojigram.git"
+  },
+  "author": "hata6502",
+  "bugs": {
+    "url": "https://github.com/hata6502/emojigram/issues"
+  },
+  "homepage": "https://github.com/hata6502/emojigram#readme",
+  "scripts": {
+    "build": "run-s build:*",
+    "build:css": "npx @tailwindcss/cli -i src/index.css -o public/index.css --minify",
+    "build:js": "node esbuild.ts",
+    "fix": "prettier --write .",
+    "start": "http-server -c-1 public",
+    "test": "run-s test:*",
+    "test:format": "prettier --check .",
+    "test:type": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@headlessui/react": "^2.2.2",
+    "@heroicons/react": "^2.2.0",
+    "@microsoft/clarity": "^1.0.0",
+    "@tailwindcss/cli": "^4.1.4",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "clsx": "^2.1.1",
+    "esbuild": "^0.25.3",
+    "http-server": "^14.1.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.4",
+    "typescript": "^5.8.3"
+  }
+}
