@@ -100,6 +100,7 @@ export const Emojigram: FunctionComponent = () => {
     canvasContext.drawImage(image, 0, 0, canvas.width, canvas.height);
 
     setImageDataURL(canvas.toDataURL("image/jpeg"));
+    setEmojigram(undefined);
   };
 
   const handleDescriptionTextareaChange: ChangeEventHandler<
