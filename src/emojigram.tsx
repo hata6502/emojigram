@@ -13,6 +13,31 @@ export const Emojigram: FunctionComponent = () => {
       rotate: number;
     }[]
   >();
+  const emojigramDataURL =
+    emojigram &&
+    `data:image/svg+xml,${encodeURIComponent(
+      `<svg version="1.1" width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+        ${emojigram
+          .map(
+            (emoji) =>
+              `<text
+                x="${emoji.x}"
+                y="${emoji.y}"
+                dominant-baseline="central"
+                text-anchor="middle"
+                transform="rotate(${emoji.rotate})"
+                font-size="${emoji.fontSize}"
+                style="
+                  text-shadow: -1px -1px #ffffff, 1px -1px #ffffff, -1px 1px #ffffff, 1px 1px #ffffff;
+                "
+              >
+                ${emoji.text}
+              </text>`,
+          )
+          .join("")}
+      </svg>`,
+    )}`;
+
   const [description, setDescription] = useState("");
   const [imageDataURL, setImageDataURL] = useState<string>();
 
@@ -100,6 +125,7 @@ export const Emojigram: FunctionComponent = () => {
     canvasContext.drawImage(image, 0, 0, canvas.width, canvas.height);
 
     setImageDataURL(canvas.toDataURL("image/jpeg"));
+    setDescription("");
     setEmojigram(undefined);
   };
 
@@ -148,29 +174,8 @@ export const Emojigram: FunctionComponent = () => {
         }
       >
         <div className="flex min-h-[196px] w-full items-center justify-center rounded-md bg-zinc-50 p-4">
-          {emojigram ? (
-            <svg
-              viewBox="0 0 512 512"
-              style={{ maxWidth: 512, maxHeight: 512 }}
-            >
-              {emojigram.map((emoji, index) => (
-                <text
-                  key={index}
-                  x={emoji.x}
-                  y={emoji.y}
-                  dominantBaseline="central"
-                  textAnchor="middle"
-                  transform={`rotate(${emoji.rotate})`}
-                  fontSize={emoji.fontSize}
-                  style={{
-                    textShadow:
-                      "-1px -1px #ffffff, 1px -1px #ffffff, -1px 1px #ffffff, 1px 1px #ffffff",
-                  }}
-                >
-                  {emoji.text}
-                </text>
-              ))}
-            </svg>
+          {emojigramDataURL ? (
+            <img src={emojigramDataURL} alt="生成されたEmojigram" />
           ) : (
             <p className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
               {generating
