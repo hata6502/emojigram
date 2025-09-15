@@ -161,6 +161,10 @@ export const Emojigram: FunctionComponent = () => {
                   textAnchor="middle"
                   transform={`rotate(${emoji.rotate})`}
                   fontSize={emoji.fontSize}
+                  style={{
+                    textShadow:
+                      "-1px -1px #ffffff, 1px -1px #ffffff, -1px 1px #ffffff, 1px 1px #ffffff",
+                  }}
                 >
                   {emoji.text}
                 </text>
