@@ -30,6 +30,10 @@ export const App: FunctionComponent = () => {
               title: "premyお絵かき",
               url: "https://premy.hata6502.com/",
             },
+            {
+              title: "写真地図",
+              url: "https://almap.hata6502.com/",
+            },
           ].map(({ title, url }) => (
             <a
               key={title}
