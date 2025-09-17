@@ -5,6 +5,7 @@ import type { ChangeEventHandler, FunctionComponent } from "react";
 import { z } from "zod";
 
 export const Emojigram: FunctionComponent = () => {
+  const [caption, setCaption] = useState("");
   const [emojigramDataURL, setEmojigramDataURL] = useState("");
   const [generating, setGenerating] = useState(false);
 
@@ -39,8 +40,9 @@ export const Emojigram: FunctionComponent = () => {
             `Failed to fetch emojigram: ${response.status} ${response.statusText}`,
           );
         }
-        const { emojigram } = z
+        const { caption, emojigram } = z
           .object({
+            caption: z.string(),
             emojigram: z.array(
               z.object({
                 x: z.number(),
@@ -48,36 +50,37 @@ export const Emojigram: FunctionComponent = () => {
                 text: z.string(),
                 fontSize: z.number(),
                 rotate: z.number(),
+                horizontalFlip: z.boolean(),
+                verticalFlip: z.boolean(),
               }),
             ),
           })
           .parse(await response.json());
 
-        const svgDataURL = `data:image/svg+xml,${encodeURIComponent(
-          `<svg version="1.1" width="512" height="512" xmlns="http://www.w3.org/2000/svg">
-            ${emojigram
-              .map(
-                (emoji) =>
-                  `<text
-                    x="${emoji.x}"
-                    y="${emoji.y}"
-                    dominant-baseline="central"
-                    text-anchor="middle"
-                    transform="rotate(${emoji.rotate})"
-                    font-size="${emoji.fontSize}"
-                    style="
-                      text-shadow: -1px -1px #ffffff, 1px -1px #ffffff, -1px 1px #ffffff, 1px 1px #ffffff;
-                    "
-                  >
-                    ${emoji.text}
-                  </text>`,
-              )
-              .join("")}
-            </svg>`,
-        )}`;
+        const svg = `<svg version="1.1" width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+          ${emojigram
+            .map(
+              (emoji) =>
+                `<text
+                  x="${emoji.x}"
+                  y="${emoji.y}"
+                  dominant-baseline="middle"
+                  text-anchor="middle"
+                  transform="rotate(${emoji.rotate}) scale(${emoji.horizontalFlip ? -1 : 1}, ${emoji.verticalFlip ? -1 : 1})"
+                  transform-origin="${emoji.x} ${emoji.y}"
+                  font-size="${emoji.fontSize}"
+                  style="
+                    text-shadow: -1px -1px #ffffff, 1px -1px #ffffff, -1px 1px #ffffff, 1px 1px #ffffff;
+                  "
+                >
+                  ${emoji.text}
+                </text>`,
+            )
+            .join("")}
+        </svg>`;
 
         const svgImage = new Image();
-        svgImage.src = svgDataURL;
+        svgImage.src = `data:image/svg+xml,${encodeURIComponent(svg)}`;
         await svgImage.decode();
         const canvas = document.createElement("canvas");
         canvas.width = svgImage.naturalWidth * 2;
@@ -92,8 +95,11 @@ export const Emojigram: FunctionComponent = () => {
         if (abortController.signal.aborted) {
           throw abortController.signal.reason;
         }
+        setCaption(caption);
         setEmojigramDataURL(pngDataURL);
         console.log(emojigram);
+        console.log(svg);
+        console.log(caption);
       } finally {
         if (!abortController.signal.aborted) {
           setGenerating(false);
@@ -141,6 +147,7 @@ export const Emojigram: FunctionComponent = () => {
     }
     canvasContext.drawImage(image, 0, 0, canvas.width, canvas.height);
 
+    setCaption("");
     setEmojigramDataURL("");
     setDescription("");
     setImageDataURL(canvas.toDataURL("image/jpeg"));
@@ -194,18 +201,22 @@ export const Emojigram: FunctionComponent = () => {
             : {}
         }
       >
-        <div className="flex min-h-[196px] w-full items-center justify-center rounded-md bg-zinc-50 p-4">
+        <div className="flex min-h-[196px] w-full items-center justify-center rounded-md bg-zinc-50">
           {emojigramDataURL ? (
-            <img
-              src={emojigramDataURL}
-              alt="生成されたEmojigram"
-              style={{ width: 512 }}
-            />
+            <figure>
+              <img
+                src={emojigramDataURL}
+                alt={caption}
+                style={{ width: 512 }}
+              />
+
+              <figcaption className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
+                {caption}
+              </figcaption>
+            </figure>
           ) : (
             <p className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
-              {generating
-                ? "Emojigramを生成しています……"
-                : "写真を選択すると、Emojigramの生成結果がここに表示されます"}
+              Emojigramを生成しています……
             </p>
           )}
         </div>
