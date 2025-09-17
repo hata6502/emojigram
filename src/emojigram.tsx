@@ -203,17 +203,11 @@ export const Emojigram: FunctionComponent = () => {
       >
         <div className="flex min-h-[196px] w-full items-center justify-center rounded-md bg-zinc-50">
           {emojigramDataURL ? (
-            <figure>
-              <img
-                src={emojigramDataURL}
-                alt={caption}
-                style={{ width: 512 }}
-              />
-
-              <figcaption className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
-                {caption}
-              </figcaption>
-            </figure>
+            <img
+              src={emojigramDataURL}
+              alt={caption}
+              style={{ width: 512 }}
+            />
           ) : (
             <p className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
               Emojigramを生成しています……
