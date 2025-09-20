@@ -15,7 +15,7 @@ export const App: FunctionComponent = () => {
         <p className="mt-6 text-center text-lg/7 text-zinc-500 sm:text-base/6">
           写真を抽象的な絵文字の配置で表現
           <br />
-          アートやSNS投稿に
+          クイズやSNS投稿に
         </p>
       </div>
 

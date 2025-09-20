@@ -1,4 +1,8 @@
-import { ArrowPathIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  PhotoIcon,
+  ShareIcon,
+} from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useEffect, useId, useRef, useState } from "react";
 import type { ChangeEventHandler, FunctionComponent } from "react";
@@ -83,12 +87,14 @@ export const Emojigram: FunctionComponent = () => {
         svgImage.src = `data:image/svg+xml,${encodeURIComponent(svg)}`;
         await svgImage.decode();
         const canvas = document.createElement("canvas");
-        canvas.width = svgImage.naturalWidth * 2;
-        canvas.height = svgImage.naturalHeight * 2;
+        canvas.width = 1200;
+        canvas.height = 1200;
         const canvasContext = canvas.getContext("2d");
         if (!canvasContext) {
           throw new Error("Canvas context is not available");
         }
+        canvasContext.fillStyle = "#000000";
+        canvasContext.fillRect(0, 0, canvas.width, canvas.height);
         canvasContext.drawImage(svgImage, 0, 0, canvas.width, canvas.height);
         const pngDataURL = canvas.toDataURL("image/png");
 
@@ -165,7 +171,7 @@ export const Emojigram: FunctionComponent = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-center gap-y-4">
+      <div className="text-center">
         <button
           type="button"
           onClick={handleImageButtonClick}
@@ -174,47 +180,15 @@ export const Emojigram: FunctionComponent = () => {
           <PhotoIcon className="size-6 shrink-0" aria-hidden="true" />
           写真を選択
         </button>
-
-        <input
-          ref={imageInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleInputChange}
-        />
       </div>
 
-      <div
-        className={clsx(
-          "flex min-h-[200px] items-center justify-center rounded-lg border p-[2px]",
-          generating
-            ? "border-transparent [background-size:300%]"
-            : "border-zinc-950/10 bg-zinc-50",
-        )}
-        style={
-          generating
-            ? {
-                backgroundImage:
-                  "linear-gradient(45deg, #fde68a, #86efac, #7dd3fc, #93c5fd, #c4b5fd, #f9a8d4, #fde68a)",
-                animation: "gradient-spin 3s linear infinite",
-              }
-            : {}
-        }
-      >
-        <div className="flex min-h-[196px] w-full items-center justify-center rounded-md bg-zinc-50">
-          {emojigramDataURL ? (
-            <img
-              src={emojigramDataURL}
-              alt={caption}
-              style={{ width: 512 }}
-            />
-          ) : (
-            <p className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
-              Emojigramを生成しています……
-            </p>
-          )}
-        </div>
-      </div>
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleInputChange}
+      />
 
       <div>
         <div className="flex items-center justify-between">
@@ -243,6 +217,50 @@ export const Emojigram: FunctionComponent = () => {
           className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm/6"
         />
       </div>
+
+      <div
+        className={clsx(
+          "flex min-h-[200px] items-center justify-center rounded-lg border p-[2px]",
+          generating
+            ? "border-transparent [background-size:300%]"
+            : "border-zinc-950/10 bg-zinc-50",
+        )}
+        style={
+          generating
+            ? {
+                backgroundImage:
+                  "linear-gradient(45deg, #fde68a, #86efac, #7dd3fc, #93c5fd, #c4b5fd, #f9a8d4, #fde68a)",
+                animation: "gradient-spin 3s linear infinite",
+              }
+            : {}
+        }
+      >
+        <div className="flex min-h-[196px] w-full items-center justify-center rounded-md bg-zinc-50">
+          {emojigramDataURL ? (
+            <img src={emojigramDataURL} alt={caption} style={{ width: 512 }} />
+          ) : (
+            <p className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
+              Emojigramを生成しています……
+            </p>
+          )}
+        </div>
+      </div>
+
+      {emojigramDataURL && (
+        <div className="text-center">
+          <a
+            href={`https://twitter.com/intent/tweet?${new URLSearchParams({
+              hashtags: "Emojigram",
+              url: "https://emojigram.hata6502.com/",
+            })}`}
+            target="_blank"
+            className="relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg border border-transparent bg-zinc-900 px-8 py-4 text-base font-semibold text-white shadow-sm transition-colors hover:bg-zinc-800 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none"
+          >
+            <ShareIcon className="size-5 shrink-0" aria-hidden="true" />
+            Xにポスト
+          </a>
+        </div>
+      )}
     </div>
   );
 };
