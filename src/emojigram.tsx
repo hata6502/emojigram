@@ -251,6 +251,7 @@ export const Emojigram: FunctionComponent = () => {
           <a
             href={`https://twitter.com/intent/tweet?${new URLSearchParams({
               hashtags: "Emojigram",
+              text: caption,
               url: "https://emojigram.hata6502.com/",
             })}`}
             target="_blank"
