@@ -8,6 +8,19 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ChangeEventHandler, FunctionComponent } from "react";
 import { z } from "zod";
 
+const emojigramSchema = z.array(
+  z.object({
+    x: z.number(),
+    y: z.number(),
+    text: z.string(),
+    fontSize: z.number(),
+    rotate: z.number(),
+    horizontalFlip: z.boolean(),
+    verticalFlip: z.boolean(),
+  }),
+);
+type Emojigram = z.infer<typeof emojigramSchema>;
+
 export const Emojigram: FunctionComponent = () => {
   const [caption, setCaption] = useState("");
   const [emojigramDataURL, setEmojigramDataURL] = useState("");
@@ -31,81 +44,87 @@ export const Emojigram: FunctionComponent = () => {
         if (abortController.signal.aborted) {
           throw abortController.signal.reason;
         }
-        const response = await fetch(
+        const initResponse = await fetch(
           "https://generate-98542956806.us-central1.run.app",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ description, image: imageDataURL }),
+            body: JSON.stringify({
+              type: "init",
+              description,
+              image: imageDataURL,
+            }),
           },
         );
-        if (!response.ok) {
+        if (!initResponse.ok) {
           throw new Error(
-            `Failed to fetch emojigram: ${response.status} ${response.statusText}`,
+            `Failed to fetch: ${initResponse.status} ${initResponse.statusText}`,
           );
         }
-        const { caption, emojigram } = z
+        const initResponseData = z
           .object({
             caption: z.string(),
-            emojigram: z.array(
-              z.object({
-                x: z.number(),
-                y: z.number(),
-                text: z.string(),
-                fontSize: z.number(),
-                rotate: z.number(),
-                horizontalFlip: z.boolean(),
-                verticalFlip: z.boolean(),
-              }),
-            ),
+            emojigram: emojigramSchema,
+            responseID: z.string(),
           })
-          .parse(await response.json());
+          .parse(await initResponse.json());
 
-        const svg = `<svg version="1.1" width="512" height="512" xmlns="http://www.w3.org/2000/svg">
-          ${emojigram
-            .map(
-              (emoji) =>
-                `<text
-                  x="${emoji.x}"
-                  y="${emoji.y}"
-                  dominant-baseline="middle"
-                  text-anchor="middle"
-                  transform="rotate(${emoji.rotate}) scale(${emoji.horizontalFlip ? -1 : 1}, ${emoji.verticalFlip ? -1 : 1})"
-                  transform-origin="${emoji.x} ${emoji.y}"
-                  font-size="${emoji.fontSize}"
-                  style="
-                    text-shadow: -1px -1px #ffffff, 1px -1px #ffffff, -1px 1px #ffffff, 1px 1px #ffffff;
-                  "
-                >
-                  ${emoji.text}
-                </text>`,
-            )
-            .join("")}
-        </svg>`;
-
-        const svgImage = new Image();
-        svgImage.src = `data:image/svg+xml,${encodeURIComponent(svg)}`;
-        await svgImage.decode();
-        const canvas = document.createElement("canvas");
-        canvas.width = 1200;
-        canvas.height = 1200;
-        const canvasContext = canvas.getContext("2d");
-        if (!canvasContext) {
-          throw new Error("Canvas context is not available");
-        }
-        canvasContext.fillStyle = "#000000";
-        canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-        canvasContext.drawImage(svgImage, 0, 0, canvas.width, canvas.height);
-        const pngDataURL = canvas.toDataURL("image/png");
+        const emojigramDataURL = await render(initResponseData.emojigram);
 
         if (abortController.signal.aborted) {
           throw abortController.signal.reason;
         }
-        setCaption(caption);
-        setEmojigramDataURL(pngDataURL);
-        console.log(emojigram);
-        console.log(svg);
-        console.log(caption);
+        setCaption(initResponseData.caption);
+        setEmojigramDataURL(emojigramDataURL);
+
+        let previousResponseID = initResponseData.responseID;
+        let renderedImage = emojigramDataURL;
+        for (let fixCount = 0; fixCount < 10; fixCount++) {
+          if (abortController.signal.aborted) {
+            throw abortController.signal.reason;
+          }
+          const fixResponse = await fetch(
+            "https://generate-98542956806.us-central1.run.app",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                type: "fix",
+                previousResponseID,
+                renderedImage,
+              }),
+            },
+          );
+          if (!fixResponse.ok) {
+            throw new Error(
+              `Failed to fetch: ${fixResponse.status} ${fixResponse.statusText}`,
+            );
+          }
+          const fixResponseData = z
+            .union([
+              z.object({
+                fixed: z.literal(true),
+                emojigram: emojigramSchema,
+                responseID: z.string(),
+              }),
+              z.object({ fixed: z.literal(false) }),
+            ])
+            .parse(await fixResponse.json());
+
+          if (fixResponseData.fixed) {
+            const emojigramDataURL = await render(fixResponseData.emojigram);
+
+            if (abortController.signal.aborted) {
+              throw abortController.signal.reason;
+            }
+            setEmojigramDataURL(emojigramDataURL);
+
+            previousResponseID = fixResponseData.responseID;
+            renderedImage = emojigramDataURL;
+          } else {
+            break;
+          }
+        }
       } finally {
         if (!abortController.signal.aborted) {
           setGenerating(false);
@@ -264,4 +283,57 @@ export const Emojigram: FunctionComponent = () => {
       )}
     </div>
   );
+};
+
+const render = async (emojigram: Emojigram) => {
+  const svg = `<svg version="1.1" width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+    ${emojigram
+      .map(
+        (emoji) => `<text
+          x="${emoji.x}"
+          y="${emoji.y}"
+          dominant-baseline="middle"
+          text-anchor="middle"
+          transform="
+            rotate(${emoji.rotate})
+            scale(${emoji.horizontalFlip ? -1 : 1}, ${emoji.verticalFlip ? -1 : 1})
+          "
+          transform-origin="${emoji.x} ${emoji.y}"
+          font-family="sans-serif"
+          font-size="${emoji.fontSize}"
+          style="
+            text-shadow:
+              -2px -2px #ffffff,
+              0px -2px #ffffff,
+              2px -2px #ffffff,
+              -2px 0px #ffffff,
+              2px 0px #ffffff,
+              -2px 2px #ffffff,
+              0px 2px #ffffff,
+              2px 2px #ffffff;
+          "
+        >
+          ${emoji.text}
+        </text>`,
+      )
+      .join("")}
+  </svg>`;
+
+  const svgImage = new Image();
+  svgImage.src = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  await svgImage.decode();
+
+  const canvas = document.createElement("canvas");
+  canvas.width = svgImage.naturalWidth * 2;
+  canvas.height = svgImage.naturalHeight * 2;
+  const canvasContext = canvas.getContext("2d");
+  if (!canvasContext) {
+    throw new Error("Canvas context is not available");
+  }
+
+  canvasContext.fillStyle = "#000000";
+  canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+  canvasContext.drawImage(svgImage, 0, 0, canvas.width, canvas.height);
+
+  return canvas.toDataURL("image/png");
 };
