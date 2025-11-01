@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./app";
 
-Clarity.init("tazyym5q22");
+Clarity.init("tzb0jilbb4");
 
 const Index: FunctionComponent = () => (
   <StrictMode>
