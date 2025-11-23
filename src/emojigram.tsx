@@ -79,7 +79,7 @@ export const Emojigram: FunctionComponent = () => {
 
         let previousResponseID = initResponseData.responseID;
         let renderedImage = emojigramDataURL;
-        for (let fixCount = 0; fixCount < 1; fixCount++) {
+        for (let fixCount = 0; fixCount < 0; fixCount++) {
           if (abortController.signal.aborted) {
             throw abortController.signal.reason;
           }
