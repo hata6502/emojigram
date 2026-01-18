@@ -31,8 +31,8 @@ export const App: FunctionComponent = () => {
               url: "https://premy.hata6502.com/",
             },
             {
-              title: "写真地図",
-              url: "https://almap.hata6502.com/",
+              title: "くっきりレンズ",
+              url: "https://kukkiri-lens.hata6502.com/",
             },
           ].map(({ title, url }) => (
             <a
