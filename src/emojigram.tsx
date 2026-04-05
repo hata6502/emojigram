@@ -79,7 +79,7 @@ export const Emojigram: FunctionComponent = () => {
 
         let previousResponseID = initResponseData.responseID;
         let renderedImage = emojigramDataURL;
-        for (let fixCount = 0; fixCount < 0; fixCount++) {
+        for (let fixCount = 0; fixCount < 1; fixCount++) {
           if (abortController.signal.aborted) {
             throw abortController.signal.reason;
           }
@@ -188,6 +188,20 @@ export const Emojigram: FunctionComponent = () => {
     setRegenerateCount((regenerateCount) => regenerateCount + 1);
   };
 
+  const handleShareButtonClick = async () => {
+    const imageResponse = await fetch(emojigramDataURL);
+    const imageBlob = await imageResponse.blob();
+
+    await navigator.share({
+      files: [
+        new File([imageBlob], `${caption}.png`, { type: imageBlob.type }),
+      ],
+      text: `${caption}
+#Emojigram https://emojigram.hata6502.com/
+`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -237,48 +251,48 @@ export const Emojigram: FunctionComponent = () => {
         />
       </div>
 
-      <div
-        className={clsx(
-          "flex min-h-[200px] items-center justify-center rounded-lg border p-[2px]",
-          generating
-            ? "border-transparent [background-size:300%]"
-            : "border-zinc-950/10 bg-zinc-50",
-        )}
-        style={
-          generating
-            ? {
-                backgroundImage:
-                  "linear-gradient(45deg, #fde68a, #86efac, #7dd3fc, #93c5fd, #c4b5fd, #f9a8d4, #fde68a)",
-                animation: "gradient-spin 3s linear infinite",
-              }
-            : {}
-        }
-      >
-        <div className="flex min-h-[196px] w-full items-center justify-center rounded-md bg-zinc-50">
-          {emojigramDataURL ? (
-            <img src={emojigramDataURL} alt={caption} style={{ width: 512 }} />
-          ) : (
-            <p className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
-              Emojigramを生成しています……
-            </p>
+      <div className="space-y-3">
+        <div
+          className={clsx(
+            "flex min-h-[200px] items-center justify-center rounded-lg border p-[2px]",
+            generating
+              ? "border-transparent [background-size:300%]"
+              : "border-zinc-950/10 bg-zinc-50",
           )}
+          style={
+            generating
+              ? {
+                  backgroundImage:
+                    "linear-gradient(45deg, #fde68a, #86efac, #7dd3fc, #93c5fd, #c4b5fd, #f9a8d4, #fde68a)",
+                  animation: "gradient-spin 3s linear infinite",
+                }
+              : {}
+          }
+        >
+          <div className="flex min-h-[196px] w-full items-center justify-center rounded-md bg-zinc-50">
+            {emojigramDataURL ? (
+              <img src={emojigramDataURL} alt="" style={{ width: 512 }} />
+            ) : (
+              <p className="text-center text-base/6 text-zinc-500 sm:text-sm/6">
+                Emojigramを生成しています……
+              </p>
+            )}
+          </div>
         </div>
+
+        <p className="text-center text-sm/6 text-zinc-600">{caption}</p>
       </div>
 
       {emojigramDataURL && (
-        <div className="text-center">
-          <a
-            href={`https://twitter.com/intent/tweet?${new URLSearchParams({
-              hashtags: "Emojigram",
-              text: caption,
-              url: "https://emojigram.hata6502.com/",
-            })}`}
-            target="_blank"
-            className="relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg border border-transparent bg-zinc-900 px-8 py-4 text-base font-semibold text-white shadow-sm transition-colors hover:bg-zinc-800 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none"
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={handleShareButtonClick}
+            className="inline-flex items-center justify-center gap-x-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm/6 font-semibold text-white shadow-sm transition-colors hover:bg-zinc-800 focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:outline-none"
           >
-            <ShareIcon className="size-5 shrink-0" aria-hidden="true" />
-            Xにポスト
-          </a>
+            <ShareIcon className="size-4 shrink-0" aria-hidden="true" />
+            共有する
+          </button>
         </div>
       )}
     </div>
