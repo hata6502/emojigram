@@ -17,7 +17,7 @@
     "build:css": "npx @tailwindcss/cli -i src/index.css -o public/index.css --minify",
     "build:js": "node esbuild.ts",
     "fix": "prettier --write .",
-    "start": "http-server -c-1 public",
+    "start": "serve -n public",
     "test": "run-s test:*",
     "test:format": "prettier --check .",
     "test:type": "tsc --noEmit"
@@ -31,12 +31,12 @@
     "@types/react-dom": "^19.1.2",
     "clsx": "^2.1.1",
     "esbuild": "^0.25.3",
-    "http-server": "^14.1.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "serve": "^14.2.6",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
     "zod": "^4.1.9"
